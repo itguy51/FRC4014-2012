@@ -22,7 +22,7 @@
     explanations, see the file ${sunspot.home}/default.properties.
 
     -->
-
+    <property name="src.dir" value="com/hightechhighfives"/>
     <property name="user.properties.file" value="build.properties"/>
     <property file="${user.home}/.sunspotfrc.properties"/>
     <import file="${sunspot.home}/build.xml"/>
