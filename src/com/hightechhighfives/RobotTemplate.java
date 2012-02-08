@@ -43,7 +43,7 @@ public class RobotTemplate extends SimpleRobot {
     private RobotDrive drive;
 
     public RobotTemplate() {
-        //drive = new RobotDrive(frontLeftJaguar, rearLeftJaguar, frontRightJaguar, rearRightJaguar);
+       //drive = new RobotDrive(LeftJaguar, RightJaguar);
         // create a joystick to be used by the driver
         driverStick = new Joystick(JoystickChannelDriver);
     }
