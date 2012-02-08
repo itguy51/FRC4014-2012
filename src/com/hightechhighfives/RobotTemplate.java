@@ -8,7 +8,6 @@
 package com.hightechhighfives;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.can.CANTimeoutException;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -22,8 +21,10 @@ public class RobotTemplate extends SimpleRobot {
     // what the PWM channel is used to control. This way, it's easy to look
     // at this section of code and make sure that the PWM wiring matches
     // where the code thinks it is connected.
-    final int PWMChannelLeftMotor = 2;
-    final int PWMChannelRightMotor = 6;
+    final int PWMChannelLeftMotor = 1;
+    final int PWMChannelRightMotor = 2;   //@Ted: Is The left motor on PWM 1 and the right on PWM 2?
+       
+    
     // The following variables give a name to each Joystick channel. This makes
     // it easier to know in the driver station which joystick should be matched
     // to which joystick port.
