@@ -24,9 +24,11 @@ public class RobotProgram extends SimpleRobot {
     final int PWMChannelLeftMotor = 1;
     final int PWMChannelRightMotor = 2;   //@Ted: Is The left motor on PWM 1 and the right on PWM 2?
     
-    
     //The following are the Relay channels.
     final int Relay1Channel = 1;
+    
+    //These are Limit Switch Channels
+    final int limitSwitch1Channel = 1;
     
     // The following variables give a name to each Joystick channel. This makes
     // it easier to know in the driver station which joystick should be matched
@@ -41,6 +43,7 @@ public class RobotProgram extends SimpleRobot {
     
     Joystick driverStick; // joystick used by the driver
     
+    LimitSwitch limitSwitch1;
     
     RobotDrive drive;
     //Create a driverstation object
@@ -50,7 +53,9 @@ public class RobotProgram extends SimpleRobot {
     public RobotProgram() {
        //drive = new RobotDrive(LeftJaguar, RightJaguar);
         // create a joystick to be used by the driver
+        SpikeRelay1 = new Relay(Relay1Channel);
         driverStick = new Joystick(JoystickChannelDriver);
+        limitSwitch1 = new LimitSwitch(limitSwitch1Channel);
     }
 
     /**
@@ -67,7 +72,6 @@ public class RobotProgram extends SimpleRobot {
         try {
             LeftJaguar = new Jaguar(PWMChannelLeftMotor);
             RightJaguar = new Jaguar(PWMChannelRightMotor);
-            SpikeRelay1 = new Relay(Relay1Channel);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -139,15 +143,13 @@ public class RobotProgram extends SimpleRobot {
             // frontLeftJaguar.set(0.5);
             // frontRightJaguar.set(-0.5);
 
-            /*
+            
             System.out.println("move: " + moveValue +
                     " rotate = " + rotateValue +
-                    ", frontLeft = " + frontLeftJaguar.get() +
-                    ", rearLeft = " + rearLeftJaguar.get() +
-                    ", frontRight = " + frontRightJaguar.get() +
-                    ", rearRight = " + rearRightJaguar.get() +
-                    ", LimitSwitch = " + testSwitch.isOpen());
-             */
+                    ", Left = " + LeftJaguar.get() +
+                    ", Right = " + RightJaguar.get() +
+                    ", Limit Switch(Open) = " + limitSwitch1.isOpen());
+            
 
             // Sleep for 5 milliseconds to give the cRio a chance to
             // Process other events
