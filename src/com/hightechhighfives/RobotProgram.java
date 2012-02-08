@@ -23,7 +23,10 @@ public class RobotProgram extends SimpleRobot {
     // where the code thinks it is connected.
     final int PWMChannelLeftMotor = 1;
     final int PWMChannelRightMotor = 2;   //@Ted: Is The left motor on PWM 1 and the right on PWM 2?
-       
+    
+    
+    //The following are the Relay channels.
+    final int Relay1Channel = 1;
     
     // The following variables give a name to each Joystick channel. This makes
     // it easier to know in the driver station which joystick should be matched
@@ -34,16 +37,16 @@ public class RobotProgram extends SimpleRobot {
     Jaguar LeftJaguar;
     Jaguar RightJaguar;
 
+    Relay SpikeRelay1;
+    
     Joystick driverStick; // joystick used by the driver
     
+    
+    RobotDrive drive;
     //Create a driverstation object
     DriverStation ds = DriverStation.getInstance();
     
-    //Assign a variable to a specific Analog Input dial
-    final int AnalogInputBoost = 1;
-    private RobotDrive drive;
-    Relay SpikeRelay1;
-    final int Relay1Channel = 1;
+    //Assign a variable to a specific Analog Input dial    
     public RobotProgram() {
        //drive = new RobotDrive(LeftJaguar, RightJaguar);
         // create a joystick to be used by the driver
