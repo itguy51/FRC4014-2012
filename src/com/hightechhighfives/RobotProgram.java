@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.*;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class RobotTemplate extends SimpleRobot {
+public class RobotProgram extends SimpleRobot {
     // The following variables give names to each PWM channel that indicates
     // what the PWM channel is used to control. This way, it's easy to look
     // at this section of code and make sure that the PWM wiring matches
@@ -43,7 +43,7 @@ public class RobotTemplate extends SimpleRobot {
     final int AnalogInputBoost = 1;
     private RobotDrive drive;
 
-    public RobotTemplate() {
+    public RobotProgram() {
        //drive = new RobotDrive(LeftJaguar, RightJaguar);
         // create a joystick to be used by the driver
         driverStick = new Joystick(JoystickChannelDriver);
