@@ -42,7 +42,8 @@ public class RobotProgram extends SimpleRobot {
     //Assign a variable to a specific Analog Input dial
     final int AnalogInputBoost = 1;
     private RobotDrive drive;
-
+    Relay SpikeRelay1;
+    final int Relay1Channel = 1;
     public RobotProgram() {
        //drive = new RobotDrive(LeftJaguar, RightJaguar);
         // create a joystick to be used by the driver
@@ -63,6 +64,7 @@ public class RobotProgram extends SimpleRobot {
         try {
             LeftJaguar = new Jaguar(PWMChannelLeftMotor);
             RightJaguar = new Jaguar(PWMChannelRightMotor);
+            SpikeRelay1 = new Relay(Relay1Channel);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -96,7 +98,13 @@ public class RobotProgram extends SimpleRobot {
             // get the move and rotate values from the joystick
             moveValue = driverStick.getRawAxis(2);
             rotateValue = driverStick.getRawAxis(1);
-
+            if(driverStick.getRawButton(1) == true){
+                //Trigger Pulled.
+                SpikeRelay1.set(Relay.Value.kOn);
+            }else{
+                //Trigger Released.
+                SpikeRelay1.set(Relay.Value.kOff);
+            }
             /* commented out for initial testing
              *
             // if the boost button is not pressed, scale the move and rotate
