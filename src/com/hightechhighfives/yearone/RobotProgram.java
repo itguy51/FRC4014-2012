@@ -30,7 +30,8 @@ public class RobotProgram extends SimpleRobot {
     final int Relay1Channel = 1;
     final int Relay2Channel = 2;
     
-    
+    boolean canRun = true;
+    boolean conveyorPressed = false;
     
     final double fullVictor = 1.0;
     final double noVictor = 0;
@@ -155,7 +156,7 @@ public class RobotProgram extends SimpleRobot {
         // without feeding the watchdog, it will assume the software is
         // hung is disable the robot
         getWatchdog().setEnabled(true);
-        getWatchdog().setExpiration(0.5);
+        getWatchdog().setExpiration(1);
         // loop over the following instructions as long as the robot
         // is enabled and the mode is set to teleoperated (operator control)
         while(isEnabled() && isOperatorControl()) {
@@ -238,25 +239,46 @@ public class RobotProgram extends SimpleRobot {
                 scaleFactor = 0.8;
             }
             if(driverStick.getRawButton(5) == true){
-                motionSwap = -1;
-            }else{
                 motionSwap = 1;
+            }else{
+                motionSwap = -1;
             }
             
             
             //Logic for Conveyor
             if(manipulatorStick.getRawButton(1) == false){
+                System.out.println("Limit 1: " + limitSwitch1.isOpen() + ", Limit 2: " + limitSwitch2.isOpen());
+                //ds.setDigitalOut(1, limitSwitch1.isOpen());
+                //ds.setDigitalOut(2, limitSwitch2.isOpen());
             if(limitSwitch1.isClosed() && limitSwitch2.isClosed()){
                 ConveyorVictor.set(1.0);
-                SpikeRelay1.set(Relay.Value.kOff);
+                if(conveyorPressed){
+                    SpikeRelay1.set(Relay.Value.kForward);
+                    Timer.delay(0.7);
+                    SpikeRelay1.set(Relay.Value.kOff);
+                    conveyorPressed = false;
+                }else{
+                    SpikeRelay1.set(Relay.Value.kOff);
+                }
             }else if(limitSwitch1.isOpen() && limitSwitch2.isClosed()){
                 ConveyorVictor.set(1.0);
                 SpikeRelay1.set(Relay.Value.kForward);
+                conveyorPressed = true;
             }else if(limitSwitch1.isClosed() && limitSwitch2.isOpen()){
-                ConveyorVictor.set(1.0);
+                ConveyorVictor.set(-1.0);
                 SpikeRelay1.set(Relay.Value.kOff);
+                /*
+                if(conveyorPressed){
+                    SpikeRelay1.set(Relay.Value.kForward);
+                    Timer.delay(0.7);
+                    SpikeRelay1.set(Relay.Value.kOff);
+                    conveyorPressed = false;
+                }else{
+                    SpikeRelay1.set(Relay.Value.kOff);
+                }*/
+                
             }else if(limitSwitch1.isOpen() && limitSwitch2.isOpen()){
-                ConveyorVictor.set(0);
+                ConveyorVictor.set(-1.0);
                 SpikeRelay1.set(Relay.Value.kOff);
             }else{
                 //What the hell? 
@@ -264,14 +286,33 @@ public class RobotProgram extends SimpleRobot {
             }
             
             
+            /*if(manipulatorStick.getRawButton(7)){
+                SpikeRelay1.set(Relay.Value.kReverse);
+            }else{
+                SpikeRelay1.set(Relay.Value.kOff);
+            }*/
             
             
             
             
+            if(driverStick.getRawButton(7)){
+                leftValue = 0.8 /** scaleFactor*/ * motionSwap;
+                rightValue = 0.8 /** scaleFactor*/ * motionSwap;
+            }else{
+                leftValue = leftValue * scaleFactor * motionSwap;
+                rightValue = rightValue * scaleFactor * motionSwap;
+            }
             
-            
-            leftValue = leftValue * scaleFactor * motionSwap;
-            rightValue = rightValue * scaleFactor * motionSwap;
+            if(manipulatorStick.getRawButton(6)){
+                if(canRun){
+                SpikeRelay2.set(Relay.Value.kForward);
+                Timer.delay(0.26);
+                SpikeRelay2.set(Relay.Value.kOff);
+                canRun = false;
+                }
+            }else{
+                canRun = true;
+            }
             //System.out.println("Scale Factor: " + scaleFactor);
             // Drive the robot in arcarde mode using the move and rotate values
             //drive.arcadeDrive (moveValue, rotateValue);
