@@ -25,14 +25,21 @@ public class RobotProgram extends SimpleRobot {
     final int PWMChannelRightMotor = 2;   //@Ted: Is The left motor on PWM 1 and the right on PWM 2?
     final int PWMChannelPitcher = 9; //The Pitcher
     //The following are the Relay channels.
+    //final int Relay1Channel = 1;
+    final int VictorChannel = 3;
     final int Relay1Channel = 1;
     final int Relay2Channel = 2;
-    final int Relay3Channel = 3;
-    final int Relay4Channel = 4;
+    
+    
+    
+    final double fullVictor = 1.0;
+    final double noVictor = 0;
     
     //These are Limit Switch Channels
     final int limitSwitch1Channel = 1;
+    final int limitSwitch2Channel = 2;
     
+    int motionSwap = 1;
     // The following variables give a name to each Joystick channel. This makes
     // it easier to know in the driver station which joystick should be matched
     // to which joystick port.
@@ -43,34 +50,37 @@ public class RobotProgram extends SimpleRobot {
     Jaguar LeftJaguar;
     Jaguar RightJaguar;
     Jaguar PitchJaguar;
-
+    //ConveyorVictor should actually be called RollerVictor, I'm just too damn
+    //lazy to rename it.
+    Victor ConveyorVictor;
     Relay SpikeRelay1;
     Relay SpikeRelay2;
-    Relay SpikeRelay3;
-    Relay SpikeRelay4;
     
     Joystick driverStick; // joystick used by the driver
     
     Joystick manipulatorStick;
     LimitSwitch limitSwitch1;
+    LimitSwitch limitSwitch2;
     
     RobotDrive drive;
     //Create a driverstation object
     DriverStation ds = DriverStation.getInstance();
     double scaleFactor;
     
+    
     //Assign a variable to a specific Analog Input dial    
     public RobotProgram() {
+        System.out.println("System Ready.");
        //drive = new RobotDrive(LeftJaguar, RightJaguar);
         // create a joystick to be used by the driver
         getWatchdog().setExpiration(2);
+        ConveyorVictor = new Victor(VictorChannel);
         SpikeRelay1 = new Relay(Relay1Channel);
         SpikeRelay2 = new Relay(Relay2Channel);
-        SpikeRelay3 = new Relay(Relay3Channel);
-        SpikeRelay4 = new Relay(Relay4Channel);
         driverStick = new Joystick(JoystickChannelDriver);
         manipulatorStick = new Joystick(JoystickChannelManipulator);
         limitSwitch1 = new LimitSwitch(limitSwitch1Channel);
+        limitSwitch2 = new LimitSwitch(limitSwitch2Channel);
         try {
             LeftJaguar = new Jaguar(PWMChannelLeftMotor);
             RightJaguar = new Jaguar(PWMChannelRightMotor);
@@ -95,15 +105,15 @@ public class RobotProgram extends SimpleRobot {
         getWatchdog().setExpiration(5);
         PitchJaguar.set(1.0);
         Timer.delay(0.75);
-        SpikeRelay1.set(Relay.Value.kForward);
+        ConveyorVictor.set(1.0);
         getWatchdog().feed();
         Timer.delay(2.5);
-        SpikeRelay1.set(Relay.Value.kOff);
+        ConveyorVictor.set(0);
         Timer.delay(0.8);
         getWatchdog().feed();
-        SpikeRelay1.set(Relay.Value.kForward);
+        ConveyorVictor.set(1.0);
         Timer.delay(2.5);
-        SpikeRelay1.set(Relay.Value.kOff);
+        ConveyorVictor.set(0);
         getWatchdog().feed();
         Timer.delay(0.05);
         PitchJaguar.set(0);
@@ -155,35 +165,53 @@ public class RobotProgram extends SimpleRobot {
             leftValue = driverStick.getRawAxis(2);
             rightValue = driverStick.getRawAxis(4);
             
-            pitchValue = manipulatorStick.getRawAxis(2);
+            pitchValue = Math.abs(manipulatorStick.getRawAxis(2));
+            if(driverStick.getRawButton(8)){
+                scaleFactor = 0.4;
+            }else{
+                scaleFactor = 0.8;
+            }
             if(manipulatorStick.getRawButton(1) == true){
+                //Trigger Pulled.
+                //System.out.println("Trigger Pulled");
+                //ConveyorVictor.set(1.0);
+                SpikeRelay1.set(Relay.Value.kForward);
+            }else{
+                //Trigger Released.
+                SpikeRelay1.set(Relay.Value.kOff);
+                //ConveyorVictor.set(0);
+            }
+            if(manipulatorStick.getRawButton(2) == true){
+                //Trigger Pulled.
+                SpikeRelay2.set(Relay.Value.kForward);
+            }else if(manipulatorStick.getRawButton(5) == true){
+                //Trigger Pulled.
+                SpikeRelay2.set(Relay.Value.kReverse);
+                //ConveyorVictor.set(1.0);
+            }else{
+                //Trigger Released.
+                SpikeRelay2.set(Relay.Value.kOff);
+            }
+            
+            
+            
+            
+           /* if(manipulatorStick.getRawButton(3) == true){
                 //Trigger Pulled.
                 SpikeRelay1.set(Relay.Value.kForward);
             }else{
                 //Trigger Released.
                 SpikeRelay1.set(Relay.Value.kOff);
-            }
-            if(manipulatorStick.getRawButton(4) == true){
-                //Trigger Pulled.
-                SpikeRelay2.set(Relay.Value.kForward);
-            }else{
-                //Trigger Released.
-                SpikeRelay2.set(Relay.Value.kOff);
-            }
-            if(manipulatorStick.getRawButton(3) == true){
-                //Trigger Pulled.
-                SpikeRelay3.set(Relay.Value.kForward);
-            }else{
-                //Trigger Released.
-                SpikeRelay3.set(Relay.Value.kOff);
-            }
-            if(manipulatorStick.getRawButton(5) == true){
+            }*/
+            
+            
+           /*if(manipulatorStick.getRawButton(5) == true){
                 //Trigger Pulled.
                 SpikeRelay4.set(Relay.Value.kForward);
             }else{
                 //Trigger Released.
                 SpikeRelay4.set(Relay.Value.kOff);
-            }
+            } */
             /* commented out for initial testing
              *
             // if the boost button is not pressed, scale the move and rotate
@@ -207,7 +235,32 @@ public class RobotProgram extends SimpleRobot {
             if(driverStick.getRawButton(6) == true){
                 scaleFactor = 1;
             }else{
-                scaleFactor = 0.5;
+                scaleFactor = 0.8;
+            }
+            if(driverStick.getRawButton(5) == true){
+                motionSwap = -1;
+            }else{
+                motionSwap = 1;
+            }
+            
+            
+            //Logic for Conveyor
+            if(manipulatorStick.getRawButton(1) == false){
+            if(limitSwitch1.isClosed() && limitSwitch2.isClosed()){
+                ConveyorVictor.set(1.0);
+                SpikeRelay1.set(Relay.Value.kOff);
+            }else if(limitSwitch1.isOpen() && limitSwitch2.isClosed()){
+                ConveyorVictor.set(1.0);
+                SpikeRelay1.set(Relay.Value.kForward);
+            }else if(limitSwitch1.isClosed() && limitSwitch2.isOpen()){
+                ConveyorVictor.set(1.0);
+                SpikeRelay1.set(Relay.Value.kOff);
+            }else if(limitSwitch1.isOpen() && limitSwitch2.isOpen()){
+                ConveyorVictor.set(0);
+                SpikeRelay1.set(Relay.Value.kOff);
+            }else{
+                //What the hell? 
+            }
             }
             
             
@@ -216,8 +269,9 @@ public class RobotProgram extends SimpleRobot {
             
             
             
-            leftValue = leftValue * scaleFactor;
-            rightValue = rightValue * scaleFactor;
+            
+            leftValue = leftValue * scaleFactor * motionSwap;
+            rightValue = rightValue * scaleFactor * motionSwap;
             //System.out.println("Scale Factor: " + scaleFactor);
             // Drive the robot in arcarde mode using the move and rotate values
             //drive.arcadeDrive (moveValue, rotateValue);
@@ -235,7 +289,7 @@ public class RobotProgram extends SimpleRobot {
                     ", Limit Switch(Open) = " + limitSwitch1.isOpen() + 
                     ", Relay 1 = " + driverStick.getRawButton(1));
             */
-            System.out.println("Limit 1 " + limitSwitch1.isOpen());
+            //System.out.println("Limit 1 " + limitSwitch1.isOpen());
             // Sleep for 5 milliseconds to give the cRio a chance to
             // Process other events
             Timer.delay(.005);
