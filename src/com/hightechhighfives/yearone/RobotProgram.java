@@ -103,9 +103,20 @@ public class RobotProgram extends SimpleRobot {
          */
         getWatchdog().setEnabled(true);
         getWatchdog().feed();
-        getWatchdog().setExpiration(5);
+        getWatchdog().setExpiration(16);
         PitchJaguar.set(1.0);
-        Timer.delay(0.75);
+        getWatchdog().feed();
+        SpikeRelay1.set(Relay.Value.kForward);
+        getWatchdog().feed();
+        Timer.delay(5);
+        getWatchdog().feed();
+        PitchJaguar.set(0);
+        getWatchdog().feed();
+        SpikeRelay1.set(Relay.Value.kOff);
+        SpikeRelay2.set(Relay.Value.kForward);
+        Timer.delay(0.26);                                                                
+        SpikeRelay2.set(Relay.Value.kOff);
+        /*Timer.delay(0.75);
         ConveyorVictor.set(1.0);
         getWatchdog().feed();
         Timer.delay(2.5);
@@ -119,7 +130,8 @@ public class RobotProgram extends SimpleRobot {
         Timer.delay(0.05);
         PitchJaguar.set(0);
         getWatchdog().feed();
-
+        * */
+        getWatchdog().setEnabled(false);
          
     }
 
@@ -127,7 +139,7 @@ public class RobotProgram extends SimpleRobot {
      * This function is called once each time the robot enters operator control.
      */
     public void operatorControl() {
-        getWatchdog().setExpiration(2);
+        //getWatchdog().setExpiration(2);
   /*      try {
             LeftJaguar = new Jaguar(PWMChannelLeftMotor);
             RightJaguar = new Jaguar(PWMChannelRightMotor);
@@ -139,7 +151,8 @@ public class RobotProgram extends SimpleRobot {
         //        drive = new RobotDrive(PWMChannelFrontLeftMotor, PWMChannelRearLeftMotor,
         //                PWMChannelFrontRightMotor, PWMChannelRearRightMotor);
         drive = new RobotDrive(LeftJaguar, RightJaguar);
-
+        //
+        
         // declare variables for the stick inputs
         double leftValue;
         double rightValue;
@@ -155,23 +168,22 @@ public class RobotProgram extends SimpleRobot {
         // will assume everything is ok. However, if you go too long
         // without feeding the watchdog, it will assume the software is
         // hung is disable the robot
-        getWatchdog().setEnabled(true);
-        getWatchdog().setExpiration(1);
+        getWatchdog().setEnabled(false);
+        getWatchdog().setExpiration(15);
+        //getWatchdog().setExpiration(2.2);
         // loop over the following instructions as long as the robot
         // is enabled and the mode is set to teleoperated (operator control)
         while(isEnabled() && isOperatorControl()) {
+            drive.setExpiration(20);
+            drive.setSafetyEnabled(false);
             // always feed the watchdog first to let it know everything is ok
-            getWatchdog().feed();
+            //getWatchdog().feed();
             // get the move and rotate values from the joystick
             leftValue = driverStick.getRawAxis(2);
             rightValue = driverStick.getRawAxis(4);
             
             pitchValue = Math.abs(manipulatorStick.getRawAxis(2));
-            if(driverStick.getRawButton(8)){
-                scaleFactor = 0.4;
-            }else{
-                scaleFactor = 0.8;
-            }
+
             if(manipulatorStick.getRawButton(1) == true){
                 //Trigger Pulled.
                 //System.out.println("Trigger Pulled");
@@ -195,7 +207,7 @@ public class RobotProgram extends SimpleRobot {
             }
             
             
-            
+            getWatchdog().feed();
             
            /* if(manipulatorStick.getRawButton(3) == true){
                 //Trigger Pulled.
@@ -239,22 +251,24 @@ public class RobotProgram extends SimpleRobot {
                 scaleFactor = 0.8;
             }
             if(driverStick.getRawButton(5) == true){
-                motionSwap = 1;
-            }else{
                 motionSwap = -1;
+            }else{
+                motionSwap = 1;
             }
             
             
             //Logic for Conveyor
             if(manipulatorStick.getRawButton(1) == false){
-                System.out.println("Limit 1: " + limitSwitch1.isOpen() + ", Limit 2: " + limitSwitch2.isOpen());
+                //System.out.println("Limit 1: " + limitSwitch1.isOpen() + ", Limit 2: " + limitSwitch2.isOpen());
                 //ds.setDigitalOut(1, limitSwitch1.isOpen());
                 //ds.setDigitalOut(2, limitSwitch2.isOpen());
             if(limitSwitch1.isClosed() && limitSwitch2.isClosed()){
                 ConveyorVictor.set(1.0);
                 if(conveyorPressed){
                     SpikeRelay1.set(Relay.Value.kForward);
+                    getWatchdog().feed();
                     Timer.delay(0.7);
+                    getWatchdog().feed();
                     SpikeRelay1.set(Relay.Value.kOff);
                     conveyorPressed = false;
                 }else{
@@ -284,7 +298,7 @@ public class RobotProgram extends SimpleRobot {
                 //What the hell? 
             }
             }
-            
+            getWatchdog().feed();
             
             /*if(manipulatorStick.getRawButton(7)){
                 SpikeRelay1.set(Relay.Value.kReverse);
@@ -296,28 +310,41 @@ public class RobotProgram extends SimpleRobot {
             
             
             if(driverStick.getRawButton(7)){
-                leftValue = 0.8 /** scaleFactor*/ * motionSwap;
-                rightValue = 0.8 /** scaleFactor*/ * motionSwap;
+                leftValue = -0.8 /** scaleFactor*/ * motionSwap;
+                rightValue = -0.8 /** scaleFactor*/ * motionSwap;
+            }else if(driverStick.getRawButton(8)){
+                leftValue = leftValue * 0.3 * motionSwap;
+                rightValue = rightValue * 0.3 * motionSwap;
             }else{
                 leftValue = leftValue * scaleFactor * motionSwap;
                 rightValue = rightValue * scaleFactor * motionSwap;
             }
-            
+            getWatchdog().feed();
             if(manipulatorStick.getRawButton(6)){
                 if(canRun){
                 SpikeRelay2.set(Relay.Value.kForward);
-                Timer.delay(0.26);
+                getWatchdog().feed();
+                Timer.delay(0.26);       
+                getWatchdog().feed();
                 SpikeRelay2.set(Relay.Value.kOff);
                 canRun = false;
                 }
             }else{
                 canRun = true;
             }
+            getWatchdog().feed();
+
             //System.out.println("Scale Factor: " + scaleFactor);
             // Drive the robot in arcarde mode using the move and rotate values
             //drive.arcadeDrive (moveValue, rotateValue);
+            getWatchdog().feed();
+            drive.tankDrive(leftValue, rightValue);
+            getWatchdog().feed();
             drive.tankDrive(leftValue, rightValue);
             PitchJaguar.set(pitchValue);
+            getWatchdog().feed();
+            drive.tankDrive(leftValue, rightValue);
+            
             // If the claw is closed, open it when the user raises his right arm
             // If the claw is open, close it when the user lowers his right arm
 
@@ -334,6 +361,8 @@ public class RobotProgram extends SimpleRobot {
             // Sleep for 5 milliseconds to give the cRio a chance to
             // Process other events
             Timer.delay(.005);
+            getWatchdog().feed();
+            getWatchdog().setEnabled(false);
         }
 
     }
