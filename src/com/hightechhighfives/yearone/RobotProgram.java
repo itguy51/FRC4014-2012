@@ -168,20 +168,32 @@ public class RobotProgram extends SimpleRobot {
         // will assume everything is ok. However, if you go too long
         // without feeding the watchdog, it will assume the software is
         // hung is disable the robot
-        getWatchdog().setEnabled(false);
-        getWatchdog().setExpiration(15);
+        
         //getWatchdog().setExpiration(2.2);
         // loop over the following instructions as long as the robot
         // is enabled and the mode is set to teleoperated (operator control)
         while(isEnabled() && isOperatorControl()) {
-            drive.setExpiration(20);
-            drive.setSafetyEnabled(false);
+            leftValue = driverStick.getRawAxis(2);
+            rightValue = driverStick.getRawAxis(4);
+            if(driverStick.getRawButton(7)){
+                leftValue = -0.8 /** scaleFactor*/ * motionSwap;
+                rightValue = -0.8 /** scaleFactor*/ * motionSwap;
+            }else if(driverStick.getRawButton(8)){
+                leftValue = leftValue * 0.3 * motionSwap;
+                rightValue = rightValue * 0.3 * motionSwap;
+            }else{
+                leftValue = leftValue * scaleFactor * motionSwap;
+                rightValue = rightValue * scaleFactor * motionSwap;
+            }
+            drive.tankDrive(leftValue, rightValue);
+            getWatchdog().setEnabled(false);
+            getWatchdog().setExpiration(15);
+            drive.setExpiration(1.5);
+            //drive.setSafetyEnabled(false);
             // always feed the watchdog first to let it know everything is ok
             //getWatchdog().feed();
             // get the move and rotate values from the joystick
-            leftValue = driverStick.getRawAxis(2);
-            rightValue = driverStick.getRawAxis(4);
-            
+
             pitchValue = Math.abs(manipulatorStick.getRawAxis(2));
 
             if(manipulatorStick.getRawButton(1) == true){
@@ -309,16 +321,7 @@ public class RobotProgram extends SimpleRobot {
             
             
             
-            if(driverStick.getRawButton(7)){
-                leftValue = -0.8 /** scaleFactor*/ * motionSwap;
-                rightValue = -0.8 /** scaleFactor*/ * motionSwap;
-            }else if(driverStick.getRawButton(8)){
-                leftValue = leftValue * 0.3 * motionSwap;
-                rightValue = rightValue * 0.3 * motionSwap;
-            }else{
-                leftValue = leftValue * scaleFactor * motionSwap;
-                rightValue = rightValue * scaleFactor * motionSwap;
-            }
+
             getWatchdog().feed();
             if(manipulatorStick.getRawButton(6)){
                 if(canRun){
@@ -363,6 +366,7 @@ public class RobotProgram extends SimpleRobot {
             Timer.delay(.005);
             getWatchdog().feed();
             getWatchdog().setEnabled(false);
+            drive.tankDrive(leftValue, rightValue);
         }
 
     }
