@@ -181,7 +181,13 @@ public class RobotProgram extends SimpleRobot {
             }else if(driverStick.getRawButton(8)){
                 leftValue = leftValue * 0.3 * motionSwap;
                 rightValue = rightValue * 0.3 * motionSwap;
+            }else if(driverStick.getRawButton(5)){
+                motionSwap = -1;
+                //Inverted controls, Invert the wheels sent.
+                leftValue = rightValue * scaleFactor * motionSwap;
+                rightValue = leftValue * scaleFactor * motionSwap;
             }else{
+                motionSwap = 1;
                 leftValue = leftValue * scaleFactor * motionSwap;
                 rightValue = rightValue * scaleFactor * motionSwap;
             }
@@ -262,11 +268,7 @@ public class RobotProgram extends SimpleRobot {
             }else{
                 scaleFactor = 0.8;
             }
-            if(driverStick.getRawButton(5) == true){
-                motionSwap = -1;
-            }else{
-                motionSwap = 1;
-            }
+
             
             
             //Logic for Conveyor
