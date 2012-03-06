@@ -8,6 +8,8 @@
 package com.hightechhighfives.yearone;
 
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.camera.AxisCamera;
+import edu.wpi.first.wpilibj.image.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -56,7 +58,6 @@ public class RobotProgram extends SimpleRobot {
     Victor ConveyorVictor;
     Relay SpikeRelay1;
     Relay SpikeRelay2;
-    
     Joystick driverStick; // joystick used by the driver
     
     Joystick manipulatorStick;
@@ -67,6 +68,8 @@ public class RobotProgram extends SimpleRobot {
     //Create a driverstation object
     DriverStation ds = DriverStation.getInstance();
     double scaleFactor;
+    AxisCamera camera;
+    private ColorImage currentImage;
     
     
     //Assign a variable to a specific Analog Input dial    
@@ -82,6 +85,9 @@ public class RobotProgram extends SimpleRobot {
         manipulatorStick = new Joystick(JoystickChannelManipulator);
         limitSwitch1 = new LimitSwitch(limitSwitch1Channel);
         limitSwitch2 = new LimitSwitch(limitSwitch2Channel);
+        camera = AxisCamera.getInstance();
+        camera.writeResolution(AxisCamera.ResolutionT.k640x360);
+        camera.writeBrightness(10);
         try {
             LeftJaguar = new Jaguar(PWMChannelLeftMotor);
             RightJaguar = new Jaguar(PWMChannelRightMotor);
@@ -103,8 +109,56 @@ public class RobotProgram extends SimpleRobot {
          */
         getWatchdog().setEnabled(true);
         getWatchdog().feed();
-        getWatchdog().setExpiration(16);
-        PitchJaguar.set(1.0);
+        getWatchdog().setExpiration(26);
+        getWatchdog().feed();
+                if(camera.freshImage()){
+                int errLoc = 0;
+                try{
+                errLoc = 1;
+                ColorImage currentImage = camera.getImage();
+                errLoc = 2;
+                MonoImage greenPlane = currentImage.getGreenPlane();
+                errLoc = 3;
+                EllipseDescriptor descEllipse = new EllipseDescriptor(0.0, 30.0, 0.0, 30.0);
+                errLoc = 4;
+                EllipseMatch[] em = greenPlane.detectEllipses(descEllipse);
+                if(em[0] != null){
+                errLoc = 5;
+                System.out.println("INFO: X: " + em[0].m_xPos + "Y: " + em[0].m_yPos);
+                errLoc = 6;
+                if(em[0].m_xPos > 0 && em[0].m_xPos < 360){
+                    System.out.println("INFO: Vertical > Acquired.");
+                    if(em[0].m_xPos < 100){
+                        PitchJaguar.set(0.5);
+                    }else if(em[0].m_xPos > 270){
+                        PitchJaguar.set(1.0);
+                    }else{
+                        PitchJaguar.set(0.7);
+                    }
+                }
+                if(em[0].m_yPos > 210 && em[0].m_yPos < 430){
+                    System.out.println("INFO: Horizontal > Acquired.");
+                }
+                }else{
+                    System.out.println("WARN: No Objects Found.");
+                }
+                }catch(Exception exc){
+                    System.out.println("ERR: Something happened. Error Location " + errLoc);
+                }
+                
+            }else{
+                System.out.println("WARN: No Image");
+            }
+            SpikeRelay1.set(Relay.Value.kForward);
+            Timer.delay(1.5);
+            PitchJaguar.set(PitchJaguar.get() - 0.18);
+            Timer.delay(2);
+            SpikeRelay1.set(Relay.Value.kOff);
+            while(true){
+         getWatchdog().feed();
+         Timer.delay(5);
+            }
+        /*PitchJaguar.set(1.0);
         getWatchdog().feed();
         SpikeRelay1.set(Relay.Value.kForward);
         getWatchdog().feed();
@@ -131,7 +185,7 @@ public class RobotProgram extends SimpleRobot {
         PitchJaguar.set(0);
         getWatchdog().feed();
         * */
-        getWatchdog().setEnabled(false);
+        //getWatchdog().setEnabled(false);
          
     }
 
@@ -184,8 +238,8 @@ public class RobotProgram extends SimpleRobot {
             }else if(driverStick.getRawButton(5)){
                 motionSwap = -1;
                 //Inverted controls, Invert the wheels sent.
-                leftValue = rightValue * scaleFactor * motionSwap;
-                rightValue = leftValue * scaleFactor * motionSwap;
+                rightValue = rightValue * scaleFactor * motionSwap;
+                leftValue = leftValue * scaleFactor * motionSwap;
             }else{
                 motionSwap = 1;
                 leftValue = leftValue * scaleFactor * motionSwap;
@@ -365,6 +419,42 @@ public class RobotProgram extends SimpleRobot {
             //System.out.println("Limit 1 " + limitSwitch1.isOpen());
             // Sleep for 5 milliseconds to give the cRio a chance to
             // Process other events
+            //Image Processing Code (Auto-Target)
+            
+            
+            /*if(camera.freshImage()){
+                int errLoc = 0;
+                try{
+                errLoc = 1;
+                ColorImage currentImage = camera.getImage();
+                errLoc = 2;
+                MonoImage greenPlane = currentImage.getGreenPlane();
+                errLoc = 3;
+                EllipseDescriptor descEllipse = new EllipseDescriptor(0.0, 30.0, 0.0, 30.0);
+                errLoc = 4;
+                EllipseMatch[] em = greenPlane.detectEllipses(descEllipse);
+                if(em[0] != null){
+                errLoc = 5;
+                System.out.println("X: " + em[0].m_xPos + "Y: " + em[0].m_yPos);
+                errLoc = 6;
+                if(em[0].m_xPos > 100 && em[0].m_xPos < 270){
+                    System.out.println("Vertical > Acquired.");
+                }
+                if(em[0].m_yPos > 210 && em[0].m_yPos < 430){
+                    System.out.println("Horizontal > Acquired.");
+                }
+                }else{
+                    System.out.println("No Objects Found.");
+                }
+                }catch(Exception exc){
+                    System.out.println("ERR: Something happened. Error Location " + errLoc);
+                }
+                
+            }else{
+                System.out.println("No Image");
+            }*/
+            
+            
             Timer.delay(.005);
             getWatchdog().feed();
             getWatchdog().setEnabled(false);
