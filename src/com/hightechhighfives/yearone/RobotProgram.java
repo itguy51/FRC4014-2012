@@ -107,6 +107,7 @@ public class RobotProgram extends SimpleRobot {
          LeftJaguar.set(0);
          RightJaguar.set(0);
          */
+        //Autonomous Auto-Target (Sort of)
         getWatchdog().setEnabled(true);
         getWatchdog().feed();
         getWatchdog().setExpiration(26);
